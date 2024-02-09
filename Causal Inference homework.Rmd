@@ -1,0 +1,48 @@
+---
+title: "Causal Inference HW1"
+author: "Aabha Latkar"
+date: "2024-02-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Load all the datasets and libraries
+```{r}
+library(readr)
+S1000<- read_csv("Sample_Size_1000 (1).csv")
+```
+
+#Split the data into 2 folds
+```{r}
+# Assuming 'S1000' is your actual data frame
+split_index <- floor(nrow(S1000) / 2)
+nuisance <- S1000[1:split_index, ]
+ATE <- S1000[(split_index + 1):nrow(S1000), ]
+```
+
+#Divide nuisance dataset into treatment and control
+```{r}
+nuisance_0 <- nuisance[nuisance$a == 0, ]
+nuisance_1 <- nuisance[nuisance$a == 1, ]
+ATE_0 <- ATE[ATE$a == 0, ]
+ATE_1 <- ATE[ATE$a == 1, ]
+```
+
+
+```{r}
+#Nuisance functions using OR 
+lm1<- lm(y ~ a+x, data = nuisance)
+predicted_values1 <- predict(lm1, newdata = ATE_1)
+predicted_values0 <- predict(lm1, newdata = ATE_0)
+mean(predicted_values1-predicted_values0)
+```
+
+#The ATE
+```{r}
+
+```
+
+

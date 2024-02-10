@@ -27,22 +27,62 @@ ATE <- S1000[(split_index + 1):nrow(S1000), ]
 ```{r}
 nuisance_0 <- nuisance[nuisance$a == 0, ]
 nuisance_1 <- nuisance[nuisance$a == 1, ]
-ATE_0 <- ATE[ATE$a == 0, ]
-ATE_1 <- ATE[ATE$a == 1, ]
 ```
 
 
 ```{r}
 #Nuisance functions using OR 
-lm1<- lm(y ~ a+x, data = nuisance)
-predicted_values1 <- predict(lm1, newdata = ATE_1)
-predicted_values0 <- predict(lm1, newdata = ATE_0)
+alm0<- lm(y ~ 1+x, data = nuisance_0)
+alm1<- lm(y ~ 1+x, data = nuisance_1)
+predicted_values1 <- predict(alm1, newdata = ATE)
+predicted_values0 <- predict(alm0, newdata = ATE)
 mean(predicted_values1-predicted_values0)
 ```
+```{r}
+#b)
+blm0<- lm(y ~ 1+a*x, data = nuisance_0)
+blm1<- lm(y ~ 1+a*x, data = nuisance_1)
+predicted_valuesb1 <- predict(blm1, newdata = ATE)
+predicted_valuesb0 <- predict(blm0, newdata = ATE)
+b<- mean(predicted_valuesb1-predicted_valuesb0)
+b
+```
+
 
 #The ATE
 ```{r}
+#c
+clm0<- lm(y ~ 1 + x + I(x^2) + I(x^3), data = nuisance_0)
+clm1<- lm(y ~ 1 + x + I(x^2) + I(x^3), data = nuisance_1)
+predicted_valuesc1 <- predict(clm1, newdata = ATE)
+predicted_valuesc0 <- predict(clm0, newdata = ATE)
+mean(predicted_valuesc1-predicted_valuesc0)
+ch<- mean(predicted_valuesc1-predicted_valuesc0)
+```
+
+```{r}
+#d
+dlm0<- lm(y ~ 1 + x + I(x^2) + I(x^3)+ I(x^4) + I(x^5)+ I(x^6), data = nuisance_0)
+dlm1<- lm(y ~ 1 + x + I(x^2) + I(x^3)+ I(x^4) + I(x^5)+ I(x^6), data = nuisance_1)
+predicted_valuesd1 <- predict(dlm1, newdata = ATE)
+predicted_valuesd0 <- predict(dlm0, newdata = ATE)
+d<- mean(predicted_valuesd1-predicted_valuesd0)
+d
+```
+```{r}
+elm0<- lm(y ~ 1 + x + I(x^2) + I(x^3)+ I(x^4) + I(x^5)+ I(x^6), data = nuisance_0)
+elm1<- lm(y ~ 1 + x + I(x^2) + I(x^3)+ I(x^4) + I(x^5)+ I(x^6), data = nuisance_1)
+epredicted_values0 <- mean(ATE$a* (ATE$y - (predict(elm0, newdata= ATE))))
+epredicted_values1 <- mean((1 - ATE$a) * (predict(elm0, newdata = ATE) - ATE$y))
+epredicted_values0+epredicted_values1
 
 ```
+```{r}
+#f) propensity score
+
+```
+
+
+
 
 

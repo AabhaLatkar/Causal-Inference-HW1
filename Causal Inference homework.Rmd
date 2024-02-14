@@ -38,6 +38,7 @@ predicted_values1 <- predict(alm1, newdata = ATE)
 predicted_values0 <- predict(alm0, newdata = ATE)
 mean(predicted_values1-predicted_values0)
 ```
+
 ```{r}
 #b)
 blm0<- lm(y ~ 1+a*x, data = nuisance_0)
@@ -69,6 +70,7 @@ predicted_valuesd0 <- predict(dlm0, newdata = ATE)
 d<- mean(predicted_valuesd1-predicted_valuesd0)
 d
 ```
+
 ```{r}
 elm0<- lm(y ~ 1 + x + I(x^2) + I(x^3)+ I(x^4) + I(x^5)+ I(x^6), data = nuisance_0)
 elm1<- lm(y ~ 1 + x + I(x^2) + I(x^3)+ I(x^4) + I(x^5)+ I(x^6), data = nuisance_1)
@@ -77,11 +79,65 @@ epredicted_values1 <- mean((1 - ATE$a) * (predict(elm0, newdata = ATE) - ATE$y))
 epredicted_values0+epredicted_values1
 
 ```
+
 ```{r}
 #f) propensity score
+ps <- glm( nuisance$a~ nuisance$x, data = nuisance, family = binomial)
+nuisance$pred_ps <- predict(ps,type = "response")
+
+ATE$pred_ps <- predict(ps, newdata = ATE, type = "response")
+
+us <- lm(ATE$y ~ ATE$pred_ps+ ATE$a)
+ATE$pred_us <- predict(us, newdata = ATE, type = "response")
+
+ATE_ATE <- mean((ATE$pred_us[ATE$a == 1] - ATE$pred_us[ATE$a == 0]))
 
 ```
 
+```{r}
+ps <- glm( nuisance$a~ nuisance$x, data = nuisance, family = binomial)
+nuisance$pred_ps <- predict(ps,type = "response")
+ATE$ipw <- ifelse(nuisance$a == 1, 1 / nuisance$pred_ps, 1 / (1 - nuisance$pred_ps))
+
+ATE$ipw_y <- ATE$ipw * ATE$y
+
+# Calculate ATE using IPW
+ATE_ATE_ipw <- mean(ATE$ipw_y, na.rm = TRUE)
+
+# Display ATE using IPW
+ATE_ATE_ipw
+
+```
+```{r}
+ATE$ipw_h <- ifelse(ATE$a == 1, 1 / ATE$pred_ps^2, 1 / (1 - ATE$pred_ps)^2)
+ATE$ipw_y_h <- ATE$ipw_h * ATE$y
+ATE_ATE_ipw_h <- mean(ATE$ipw_y_h, na.rm = TRUE)
+ATE_ATE_ipw_h
+```
+
+```{r}
+ATE$ipw_i <- ifelse(ATE$a == 1, 1 / (ATE$pred_ps * (1 - ATE$pred_ps)), 1 / ((1 - ATE$pred_ps) * ATE$pred_ps))
+ATE$ipw_y_i <- ATE$ipw_i * ATE$y
+ATE_ATE_ipw_i <- mean(ATE$ipw_y_i, na.rm = TRUE)
+```
+
+```{r}
+#Question 2: Weak and Strong Exchangibility
+#Weak exchangibility is when the units are exchangable based on the observed covariates and Strong exchangibility implies that the units should be exchangible in terms of the observed outcomes too. 
+# One example of this is in drug tests in the hospital
+```
+
+```{r}
+#Question 3
+# There are 5 possible paths from A to Y
+# 1) A-X3-Y
+# 2) A-X3-X2-Y
+# 3) A-X1-Y
+# 4) A-X4-Y
+# 5) A-X5-X4-Y
+
+#
+```
 
 
 
